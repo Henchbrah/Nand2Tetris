@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-"""First version of an assembler for the Hack platform."""
+"""First version of an assembler for the Hack Platform."""
 import sys,re
 
 
