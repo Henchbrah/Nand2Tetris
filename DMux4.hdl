@@ -1,0 +1,18 @@
+/**
+ * 4-bit Dmultiplexor .  
+ * {a,b} = {in,0} if sel == 0
+ *         {0,in} if sel == 1
+ */
+
+CHIP DMux4 {
+    IN a[4], sel;
+    OUT a[4], b[4];
+
+    PARTS:
+    Dmux(in[0],sel,out=a[0],b[0]);
+    Dmux(in[1],sel,out=a[1],b[1]);
+    Dmux(in[2],sel,out=a[2],b[2]);
+    Dmux(in[3],sel,out=a[3],b[3]);
+    
+
+}
