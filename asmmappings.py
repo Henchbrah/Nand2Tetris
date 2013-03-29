@@ -17,7 +17,7 @@ def binary(n):
 def pad(n,length=3):
     while len(n) < length: n='0'+n
     return n
-    
+    #
 three_bin_digits = map(pad,map(binary,range(8)))
 j_mnemonics = ['null','JGT','JEQ','JGE','JLT','JNE','JLE','JMP']
 d_mnemonics = ['null','M','D','MD','A','AM','AD','AMD']

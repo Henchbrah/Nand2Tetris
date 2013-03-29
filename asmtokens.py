@@ -35,7 +35,7 @@ t_NUMBER = r'[0-9]+'
 t_PLUS = r'\+'
 t_AT = r'\@'
 t_AND = r'\&'
-t_SEMICOLON = r'\;'
+t_SEMICOLON = r'\;' #
 
 
 def t_newline(t):
