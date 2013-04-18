@@ -11,7 +11,7 @@ class CodeWriter(object):
     """Translates VM commands into Hack Assembly code"""
     def __init__(self,name):
         self.endoflabel = 1
-        #self.endoffunc = 1
+        self.endoffunc = 1
         self.outname = name + '.asm'
         self.outfile = open(self.outname, "w")
         self.writeInit()
@@ -53,8 +53,8 @@ class CodeWriter(object):
         """Prep for and call function"""
         #self.outfile.write('CALL %s %s\n' %(functionName,numArgs))
         argOffset = int(numArgs) + 5
-        returnLabel = 'return%s%d' %(functionName,self.endoflabel) 
-        self.endoflabel += 1
+        returnLabel = 'return%s%d' %(functionName,self.endoffunc) 
+        self.endoffunc += 1
         self.outfile.write('@%s\n' %returnLabel)
         self.outfile.write('D=A\n')
         self.pushD()
