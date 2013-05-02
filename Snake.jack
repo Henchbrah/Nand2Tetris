@@ -1,0 +1,78 @@
+class Snake{
+    field Block head, tail;
+    field int direction, grow;
+
+    /** Constructs a new snake. Head and tail are the same block
+     * Location is 256,128,261,133 and direction is right */
+
+    constructor Snake new(){
+        var Block middle;
+        let head = Block.new(256,128,null);
+        let middle = Block.new(251,128,head);
+        let tail = Block.new(246,128,middle);
+        do head.draw();
+        do middle.draw();
+        do tail.draw();
+        let direction = 2;      //1=up,2=right,3=down,4=left
+        let grow = 0;           // if grow=1 we are growing
+        return this;
+    }
+
+    method void move(int x, int y){
+        var Block newHead;
+        let x = head.getNextX(direction); // find where new heads X1 will be
+        let y = head.getNextY(direction); // find wher new heads Y1 will be
+        if (grow = 0){
+            do tail.undraw();                 // erase tail
+            do tail.move(x,y,x+5,y+5);      // move old tail to new head position
+            do tail.draw();                 // draw new head
+            do head.movePointer(tail);       // make old head point to new head
+            let head = tail;                // officially call old tail head
+            let tail = head.getNextBlock(); // make new tail where new head points to
+            do head.movePointer(null);         // make new head point to null
+        }
+        else{
+        let grow = 0;
+        let newHead = Block.new(x,y,null);
+        do newHead.draw();
+        do head.movePointer(newHead);
+        let head = newHead;                    
+        }
+        return; 
+    }
+
+    method int getNextX(){
+        var int ret;
+        let ret = head.getNextX(direction);
+        return ret;
+    }
+
+    method int getNextY(){
+        var int ret;
+        let ret = head.getNextY(direction);
+        return ret;
+    
+    }
+
+    method void changeDirection(int dir){
+        var int test;
+        let test = dir + direction;
+        if (~(test=6)){
+            if (~(test=4)){
+                let direction = dir;
+            }
+        }
+        return;
+    }
+        
+    method void setGrow(int g){
+        let grow = g;    
+        return;
+    }
+
+    /** Accessors */
+    method block getHead(){return head;}
+    method block getTail(){return tail;}
+    method int getDirection(){return direction;}
+
+}

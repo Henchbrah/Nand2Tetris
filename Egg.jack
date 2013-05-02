@@ -1,0 +1,41 @@
+class Egg{
+    field int X,Y;
+
+    /**constructs new Egg object with coordinats a,b */
+    constructor Egg new(int a, int b){
+        let X = a;
+        let Y = b;
+        return this;
+    }
+
+    /**draws egg on screen*/
+    method void draw(){
+        do Screen.drawCircle(X,Y,2);
+        return;
+    }
+
+    /**removed egg from screen*/
+    method void undraw(){
+        do Screen.setColor(false);
+        do Screen.drawCircle(X,Y,2);
+        do Screen.setColor(true);
+        return;
+    }
+
+    /** returns true if coordinates are in egg, else false*/
+    method Bool isEgg(int x, int y){
+        if (~(X < (x+5))){ return false;}
+        if (~(X > x)){return false;}
+        if (~(Y < (y+5))){return false;}
+        if (~(Y > y)){return false;}
+        return true;
+    }
+
+
+    /** Accessors */
+    method int getX(){return X;}
+    method int getY(){return Y;}
+    
+
+
+}
