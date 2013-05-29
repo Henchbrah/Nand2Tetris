@@ -7,47 +7,47 @@ class VMWriter(self):
         self.outname = name + '.vm'
         self.outfile = open(self.outname, 'w')
     
-    def writePush(self,segment):
+    def writePush(self,segment,index):
         """Writes a VM push command"""      
-        pass
+        self.outfile.write('push %s %d\n' %(segment,index))
 
-    def writePop(self,segment):
+    def writePop(self,segment,index):
         """Writes a VM pop command"""
-        pass
+        self.outfile.write('pop %s %d\n' %(segment,index))
 
     def writeArithmetic(self,command):
         """Writes a VM arithmetic command"""
-        pass
+        self.outfile.write('%s\n' %command)
 
 
     def writeLabel(self,label):
         """Writes a VM label command"""
-        pass
-        
+        self.outfile.write('label %s\n' %label)
+	
 
     def writeGoto(self,label):
         """Writes a VM goto command"""
-        pass
+        self.outfile.write('goto %s\n' %label)
 
 
     def writeIf(self,label):
         """Writes a VM if-goto command"""
-        pass
+        self.outfile.write('if-goto %s\n' %label)
 
     def writeCall(self,name,nArgs):
         """Writes a VM call command"""
-        pass
+        self.outfile.write('call %s %d\n' %(name,nArgs)) 
 
     def writeFunction(self,name,nLocals):
-        """Writes a FM function command"""
-        pass
+        """Writes a VM function command"""
+        self.outfile.write('function %s %s\n'%(name,nLocals))
 
     def writeReturn(self):
         """Wrties a VM return command"""
-        pass
+        self.outfile.write('return\n')
 
     def close(self):
         """Closes output file"""
-        pass
+        self.outfile.close()
 
 
