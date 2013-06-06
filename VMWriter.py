@@ -1,5 +1,5 @@
 
-class VMWriter(self):
+class VMWriter(object):
     """Emits VM commands into a file, using the VM command syntax"""
     
     def __init__(self,name):

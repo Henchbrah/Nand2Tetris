@@ -94,7 +94,7 @@ class SymbolTable(object):
 
     def getIndex(self,name):
         innerScope = self.indexOf(name)
-        if innerScope or self.outerscope == None:
+        if innerScope <> None or self.outerscope == None:
             return innerScope
         else:          
             try:        

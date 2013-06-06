@@ -18,11 +18,10 @@ else:
 for f in files:
     outname = f.split('/')[-1].split('.')[0] 
     tokenizer = jT.JackTokenizer(f)
-    table = sT.SymbolTable()          
-    engine = cE.CompilationEngine(tokenizer,table)
+    table = sT.SymbolTable()
+    writer = vmW.VMWriter(outname)           
+    engine = cE.CompilationEngine(tokenizer,table,writer)
     engine.compileClass()
-    AST = engine.ast
-    writer = vmW.VMWriter(outname)  #### or could have engine produce AST
     print 'COMPILING %s'%f
 
         
