@@ -21,7 +21,7 @@ class CompilationEngine(object):
         while self.lookAhead()[1] in ('static','field'): 
             self.compileClassVarDec()   
         while self.lookAhead()[1] in ('constructor','function','method'):
-            self.compileSubroutine()
+            self.compileSubroutine(name)
         self.validate('}')                                          
         self.writer.close()     
 
@@ -50,12 +50,12 @@ class CompilationEngine(object):
             name = self.validate('IDENTIFIER') 
             self.table.define(name,type,kind)   
 
-    def compileSubroutine(self):
+    def compileSubroutine(self,className):
         """Compiles a complete method, function or constructor"""
         kind = self.validate(['constructor','function','method'])
         self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
-        self.table.define(name,'subroutine',kind)
+        self.table.define(name,type,kind)
         self.table.startSubroutine()
         self.validate('(')
         self.compileParameterList()
@@ -63,7 +63,7 @@ class CompilationEngine(object):
         self.validate('{')
         while self.lookAhead()[1] == 'var':
             self.compileVarDec()
-        self.writer.writeFunction(name,self.table.varCount('var')) # function nameoffunction #oflocals
+        self.writer.writeFunction(className+'.'+name,self.table.varCount('var')) # function nameoffunction #oflocals
         if kind == 'constructor':              # if 
             count = self.table.varCount('field')
             self.writer.writePush('constant',count)
@@ -210,7 +210,7 @@ class CompilationEngine(object):
             self.writer.writeCall('String.new',1)               # create empty string of length len(tok)
             for letter in tok:
                 self.writer.writePush('constant',ord(letter))
-                self.writer.writeCall('String.appendChar()', 2)   # append each letter to string            
+                self.writer.writeCall('String.appendChar', 2)   # append each letter to string            
         elif tokType == 'KEYWORD':
             if tok in ['false','null']:
                 self.writer.writePush('constant',0)
