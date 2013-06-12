@@ -50,4 +50,3 @@ class VMWriter(object):
         """Closes output file"""
         self.outfile.close()
 
-
