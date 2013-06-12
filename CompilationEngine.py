@@ -6,7 +6,6 @@ class CompilationEngine(object):
     def __init__(self,tokenizer,table,writer):
         """Creates a new compilation engine with the given input and output, 
 	    next routine called must be compileClass()"""
-        print 'init'
     	self.tokenizer = tokenizer
     	if not self.tokenizer.hasMoreTokens: 
 		    raise Exception('No Tokens to parse!')
@@ -17,7 +16,6 @@ class CompilationEngine(object):
 
     def compileClass(self):
         """Compiles complete class"""            
-        print 'compile class'
         self.validate('class')
         name = self.validate('IDENTIFIER')
         self.table.define(name,name,'class')	
@@ -26,17 +24,11 @@ class CompilationEngine(object):
             self.compileClassVarDec()   
         while self.lookAhead()[1] in ('constructor','function','method'):
             self.compileSubroutine(name)
-        if self.lookAhead()[1] == '0':
-            raise Exception('%s'%self.tokenizer.tokens)
-            print self.tokenizer.tokens
-        print 'inside compile class'
         self.validate('}')                                       
         self.writer.close()
-        print 'end compile class'     
 
     def compileClassVarDec(self):
         """Compiles a static declaration or a field declaration""" 
-        print 'compileClassVarDec'
         kind = self.validate(['field','static'])          
         type = self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
@@ -46,11 +38,9 @@ class CompilationEngine(object):
             name = self.validate('IDENTIFIER')
             self.table.define(name,type,kind)  				      
         self.validate(';')     
-        print 'end compileClassVarDec'
 
     def compileParameterList(self,routine):
         """Compiles a (possibly empty) parameter list, not including the enclosing "()" """
-        print 'CompileParameterList'
         atLeastOne = False
         kind = 'argument'
         if routine == 'method':
@@ -63,16 +53,14 @@ class CompilationEngine(object):
             type = self.validate(['KEYWORD','IDENTIFIER'])
             name = self.validate('IDENTIFIER') 
             self.table.define(name,type,kind)
-        print 'end CompileParameterList'   
 
     def compileSubroutine(self,className):
         """Compiles a complete method, function or constructor"""
-        print 'compileSubroutine'
         self.resetLabels()
         kind = self.validate(['constructor','function','method'])
         self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
-        self.table.define(name,type,kind)
+        self.table.define(name,None,kind)
         self.table.startSubroutine()
         self.validate('(')
         self.compileParameterList(kind)
@@ -83,9 +71,6 @@ class CompilationEngine(object):
         self.writer.writeFunction(className+'.'+name,self.table.varCount('local')) # function nameoffunction #oflocals
         if kind == 'constructor':              # if 
             count = self.table.varCount('this','outer')
-            print 'var count is ',self.table.varCount('this','outer')
-            print self.table.scope
-            print self.table.outerscope
             self.writer.writePush('constant',count)
             self.writer.writeCall('Memory.alloc',1) ##allocate memory for object
             self.writer.writePop('pointer',0) ### assign pointer to object to pointer 0
@@ -95,10 +80,8 @@ class CompilationEngine(object):
         self.compileStatements()
         self.validate('}')
         self.table.endSubroutine()       
-        print 'end compileSubroutine'    
 
     def compileVarDec(self):
-        print 'compileVarDec'
         self.validate('var')                          
         type = self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
@@ -108,11 +91,9 @@ class CompilationEngine(object):
             name = self.validate('IDENTIFIER')
             self.table.define(name,type,'local')        
         self.validate(';')        
-        print 'end compileVarDec'
         
     def compileStatements(self):
         """Compiles a sequence of statements, not including the enclosing "{}" """
-        print 'compileStatements'
         tok = self.lookAhead()[1]
         while tok <> '}':
             if tok == 'do':
@@ -127,21 +108,17 @@ class CompilationEngine(object):
                 self.compileIf()
             else:
                 raise Exception('%s should not begin a statement' %tok)
-            tok = self.lookAhead()[1]
-            print 'end compileStatements'              
+            tok = self.lookAhead()[1]              
 
     def compileDo(self):
         """Compiles a do statement"""
-        print 'compileDo'
         self.validate('do')
         self.compileTerm() 
         self.writer.writePop('temp',0)
         self.validate(';')
-        print 'end compileDo'  
 
     def compileLet(self):
         """Compiles a let statement"""      # let x = y     
-        print 'compileLet'
         self.validate('let')
         tokType,tok = self.getNextToken()
         kind,index = self.table.getKind(tok),self.table.getIndex(tok)
@@ -162,11 +139,9 @@ class CompilationEngine(object):
             self.compileExpression()
             self.writer.writePop(kind,index)
         self.validate(';')
-        print 'end compileLet'
     
     def compileWhile(self):
         """Compiles a while statement"""        
-        print 'compileWhile'
         self.validate('while')
         label1 = 'WHILE_EXP%d' %self.whileNum
         label2 = 'WHILE_END%d' %self.whileNum
@@ -182,11 +157,9 @@ class CompilationEngine(object):
         self.validate('}')            
         self.writer.writeGoto(label1)               #goto label1
         self.writer.writeLabel(label2)              #label2
-        print 'end compileWhile'
 
     def compileReturn(self):
         """Compiles a return statement"""   
-        print 'compileReturn'
         self.validate('return')
         if self.lookAhead()[1] <> ';':
             self.compileExpression()                #this should leave value on top of stack
@@ -194,11 +167,9 @@ class CompilationEngine(object):
             self.writer.writePush('constant',0)     # if is void return 0
         self.validate(';')
         self.writer.writeReturn()     
-        print 'end compileReturn'
 
     def compileIf(self):
         """Compiles an if statement, possibly with a trailing else clause"""
-        print 'compileIf'
         self.validate('if')
         label1 = 'IF_TRUE%d' %self.ifNum
         label2 = 'IF_FALSE%d' %self.ifNum
@@ -214,19 +185,18 @@ class CompilationEngine(object):
         self.validate('{')
         self.compileStatements()
         self.validate('}')
-        self.writer.writeGoto(label3)       #GOTO IF_END
+        if self.lookAhead()[1] == 'else':
+            self.writer.writeGoto(label3)       #GOTO IF_END
         self.writer.writeLabel(label2)      #IF_FALSE
         if self.lookAhead()[1] == 'else':
             self.validate('else')
             self.validate('{')
             self.compileStatements()
             self.validate('}')       
-        self.writer.writeLabel(label3)      #IF_END
-        print 'end compileIf'
+            self.writer.writeLabel(label3)      #IF_END
 
     def compileExpression(self):
         """Compiles an expression"""
-        print 'compileExpression'
         self.compileTerm() 
         while self.lookAhead()[1] in '+-*/&|<>=':
             tok = self.getNextToken()[1]
@@ -237,11 +207,9 @@ class CompilationEngine(object):
                 self.writer.writeCall('Math.multiply',2)
             else:
                 self.writer.writeArithmetic(ops[tok])
-        print 'end compileExpression'
 
     def compileExpressionList(self):
         """Compiles a (possibly empty) comma-separated list of expressions"""       
-        print 'compileExpressionList'
         atLeastOne = False
         count = 0
         while self.lookAhead()[1] <> ')':
@@ -252,13 +220,11 @@ class CompilationEngine(object):
             self.compileExpression()
             count += 1
         return count
-        print 'end compileExpressionList'
 
     def compileTerm(self):
         """Compiles a term. If the current token is an identifier, a single look-ahead token which
         may be one of "[","(" or "." suffices to distinguish between the three possibilities. Any
         other token is not part of this term and should not be advanced over"""                    
-        print 'compileTerm'
         tokType,tok = self.getNextToken()
         if tokType == 'INT_CONST':
             self.writer.writePush('constant',tok)       
@@ -292,25 +258,27 @@ class CompilationEngine(object):
             else:
                 raise Exception('%s %s is unexpected symbol' %(tokType,tok))
         elif tokType == 'IDENTIFIER':
+            count = 0
             name = tok
             kind,index = self.table.getKind(name),self.table.getIndex(name)
             tokType,tok = self.lookAhead()
             if tok == '(':
+                self.writer.writePush('pointer',0) # if is of form do something() it is method call within this class
                 self.validate('(')
                 count = self.compileExpressionList() + 1
                 self.validate(')')
-                self.writer.writePush('pointer',0)
                 currentClass = self.table.getClass()
                 self.writer.writeCall(currentClass+'.'+name,count)
             elif tok == '.':    
                 self.validate('.')
-                function = self.validate('IDENTIFIER')        
+                function = self.validate('IDENTIFIER')
+                print name, kind
+                if kind in ('this','local','static'):
+                    self.writer.writePush(kind,index)
+                    count = 1
                 self.validate('(')
-                count = self.compileExpressionList()
-                self.validate(')')
-                if self.table.getKind(function) == 'method':
-                    self.writer.writePush(kind,index)      # if it's a method, push pointer to object
-                    count += 1                
+                count += self.compileExpressionList()
+                self.validate(')')                
                 type = self.table.getType(name)
                 if type == None: type = name 
                 self.writer.writeCall('%s.%s' %(type,function),count)    
@@ -326,7 +294,7 @@ class CompilationEngine(object):
                 self.writer.writePush(kind,index)
         else:
             raise Exception('Illegal Token: %s %s' %(tokType,tok))
-        print 'end compileTerm'
+
 
     def lookAhead(self):
         """looks ahead to next (token_type, token)"""
@@ -350,19 +318,14 @@ class CompilationEngine(object):
             self.tokenizer.advance()
             tokType = self.tokenizer.tokenType()
             if tokType == 'IDENTIFIER':
-                print tokType, self.tokenizer.identifier()
                 return ( tokType, self.tokenizer.identifier() )
             elif tokType == 'STRING_CONST':
-                print tokType, self.tokenizer.stringVal()
                 return ( tokType, self.tokenizer.stringVal() )
             elif tokType == 'INT_CONST':
-                print tokType, self.tokenizer.intVal()
                 return ( tokType,self.tokenizer.intVal() )
             elif tokType == 'SYMBOL':
-                print tokType, self.tokenizer.symbol()
                 return ( tokType, self.tokenizer.symbol() )
             elif tokType == 'KEYWORD':
-                print tokType, self.tokenizer.keyWord()
                 return (tokType, self.tokenizer.keyWord() )            
             else:
                 raise Exception('Invalid token type: %s' %tokType)
