@@ -1,7 +1,7 @@
 import re
 
 string = r'(?:"[^"]*["])|(?:\'[^\']*[\'])'
-comment = r'(?:(?:\/\*\*(?:.|\n)*?/*\/)|(?:\/\/[^\n]*\n))'
+comment = r'(?:(?:\/\*\*(?:.|\n)*?\*\/)|(?:\/\/[^\n]*\n))'
 symbols = r'()[]{},;=.+-*/&|~<>'
 delimiters = r'[\(\)\[\]\{\}\,\;\=\.\+\-\*\/\&\|\~\<\>]|'+string+'| *'
 keywords = ('class','constructor','method','function','int','boolean','char','void',

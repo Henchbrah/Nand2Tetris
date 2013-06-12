@@ -265,6 +265,8 @@ class CompilationEngine(object):
         """Accepts as string or list of strings. Looks ahead to next token and if token type or token itself does not
         match string argument (or each item in list 'string') raises an exception"""
         tokType,tok = self.lookAhead()
+        print string
+        print tok, tokType
         if type(string) <> list:
             string = [string]
         if not any([(tokType == s or tok == s) for s in string]):
