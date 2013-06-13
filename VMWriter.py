@@ -9,12 +9,12 @@ class VMWriter(object):
     
     def writePush(self,segment,index):
         """Writes a VM push command"""   
-        if segment == 'field': segment = 'this' # new  
+        if segment == 'field': segment = 'this'  
         self.outfile.write('push %s %d\n' %(segment,index))
 
     def writePop(self,segment,index):
         """Writes a VM pop command"""
-        if segment == 'field': segment = 'this'   # new
+        if segment == 'field': segment = 'this'   
         self.outfile.write('pop %s %d\n' %(segment,index))
 
     def writeArithmetic(self,command):

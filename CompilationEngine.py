@@ -70,7 +70,7 @@ class CompilationEngine(object):
             self.compileVarDec()
         self.writer.writeFunction(className+'.'+name,self.table.varCount('local')) # function nameoffunction #oflocals
         if kind == 'constructor':              # if 
-            count = self.table.varCount('field','outer') # was 'this,'outer'
+            count = self.table.varCount('field','outer') 
             self.writer.writePush('constant',count)
             self.writer.writeCall('Memory.alloc',1) ##allocate memory for object
             self.writer.writePop('pointer',0) ### assign pointer to object instance to pointer 0
@@ -272,7 +272,7 @@ class CompilationEngine(object):
             elif tok == '.':    
                 self.validate('.')
                 function = self.validate('IDENTIFIER')
-                if kind in ('field','local','static'): # was 'this,'local,static
+                if kind in ('field','local','static'): 
                     self.writer.writePush(kind,index)
                     count = 1
                 self.validate('(')

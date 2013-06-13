@@ -22,7 +22,6 @@ class SymbolTable(object):
         """Defines a new Identifier of a given name, type and kind and assigns it to
         a running index. STATIC and FIELD identifiers have a class scope, while ARG and VAR
         have a subroutine scope"""
-        #if kind == 'field': kind = 'this'
         self.scope[name] = (type,kind,self.varCount(kind))
 
     def varCount(self, kind,scope='inner'):
