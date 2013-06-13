@@ -2,17 +2,17 @@
 ops = {'=':'eq','+':'add','-':'sub','&':'and','|':'or','~':'not','<':'lt','>':'gt'}
 
 class CompilationEngine(object):
-    """Gets input from the JackTokenizer and emits its parsed structure into an output file"""
+    """Accepts instances of a JackTokenizer, SymbolTable and VMWriter as input. Parses
+    the tokens from the JackTokenizer using the SymbolTable to keep track of variables.
+    Through the VMWriter emits VM code to an output file"""
     def __init__(self,tokenizer,table,writer):
         """Creates a new compilation engine with the given input and output, 
 	    next routine called must be compileClass()"""
     	self.tokenizer = tokenizer
     	if not self.tokenizer.hasMoreTokens: 
 		    raise Exception('No Tokens to parse!')
-        self.table = table
-        self.writer = writer
-        self.ifNum = 0
-        self.whileNum = 0
+        self.table,self.writer = table,writer
+        self.ifNum,self.whileNum = 0,0
 
     def compileClass(self):
         """Compiles complete class"""            
@@ -20,9 +20,9 @@ class CompilationEngine(object):
         name = self.validate('IDENTIFIER')
         self.table.define(name,name,'class')	
         self.validate('{')          
-        while self.lookAhead()[1] in ('static','field'): 
+        while self.lookAhead() in ('static','field'): 
             self.compileClassVarDec()   
-        while self.lookAhead()[1] in ('constructor','function','method'):
+        while self.lookAhead() in ('constructor','function','method'):
             self.compileSubroutine(name)
         self.validate('}')                                       
         self.writer.close()
@@ -33,7 +33,7 @@ class CompilationEngine(object):
         type = self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
         self.table.define(name,type,kind)
-        while self.lookAhead()[1] <> ';':
+        while self.lookAhead() <> ';':
             self.validate(',')
             name = self.validate('IDENTIFIER')
             self.table.define(name,type,kind)  				      
@@ -45,7 +45,7 @@ class CompilationEngine(object):
         kind = 'argument'
         if routine == 'method':
             self.table.define('this',None,kind)
-        while self.lookAhead()[1] <> ')':
+        while self.lookAhead() <> ')':
             if atLeastOne: 
                 self.validate(',')
             else: 
@@ -66,7 +66,7 @@ class CompilationEngine(object):
         self.compileParameterList(kind)
         self.validate(')')        
         self.validate('{')
-        while self.lookAhead()[1] == 'var':
+        while self.lookAhead() == 'var':
             self.compileVarDec()
         self.writer.writeFunction(className+'.'+name,self.table.varCount('local')) # function nameoffunction #oflocals
         if kind == 'constructor':              # if 
@@ -86,7 +86,7 @@ class CompilationEngine(object):
         type = self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
         self.table.define(name,type,'local')
-        while self.lookAhead()[1] <> ';':
+        while self.lookAhead() <> ';':
             self.validate(',')
             name = self.validate('IDENTIFIER')
             self.table.define(name,type,'local')        
@@ -94,7 +94,7 @@ class CompilationEngine(object):
         
     def compileStatements(self):
         """Compiles a sequence of statements, not including the enclosing "{}" """
-        tok = self.lookAhead()[1]
+        tok = self.lookAhead()
         while tok <> '}':
             if tok == 'do':
                 self.compileDo()
@@ -108,7 +108,7 @@ class CompilationEngine(object):
                 self.compileIf()
             else:
                 raise Exception('%s should not begin a statement' %tok)
-            tok = self.lookAhead()[1]              
+            tok = self.lookAhead()              
 
     def compileDo(self):
         """Compiles a do statement"""
@@ -122,7 +122,7 @@ class CompilationEngine(object):
         self.validate('let')
         tokType,tok = self.getNextToken()
         kind,index = self.table.getKind(tok),self.table.getIndex(tok)
-        if self.lookAhead()[1] == '[':      
+        if self.lookAhead() == '[':      
             self.validate('[')
             self.compileExpression()
             self.validate(']')
@@ -161,7 +161,7 @@ class CompilationEngine(object):
     def compileReturn(self):
         """Compiles a return statement"""   
         self.validate('return')
-        if self.lookAhead()[1] <> ';':
+        if self.lookAhead() <> ';':
             self.compileExpression()                #this should leave value on top of stack
         else:
             self.writer.writePush('constant',0)     # if is void return 0
@@ -185,10 +185,10 @@ class CompilationEngine(object):
         self.validate('{')
         self.compileStatements()
         self.validate('}')
-        if self.lookAhead()[1] == 'else':
+        if self.lookAhead() == 'else':
             self.writer.writeGoto(label3)       #GOTO IF_END
         self.writer.writeLabel(label2)      #IF_FALSE
-        if self.lookAhead()[1] == 'else':
+        if self.lookAhead() == 'else':
             self.validate('else')
             self.validate('{')
             self.compileStatements()
@@ -198,7 +198,7 @@ class CompilationEngine(object):
     def compileExpression(self):
         """Compiles an expression"""
         self.compileTerm() 
-        while self.lookAhead()[1] in '+-*/&|<>=':
+        while self.lookAhead() in '+-*/&|<>=':
             tok = self.getNextToken()[1]
             self.compileTerm()
             if tok == '/':
@@ -212,7 +212,7 @@ class CompilationEngine(object):
         """Compiles a (possibly empty) comma-separated list of expressions"""       
         atLeastOne = False
         count = 0
-        while self.lookAhead()[1] <> ')':
+        while self.lookAhead() <> ')':
             if atLeastOne:
                 self.validate(',')
             else:
@@ -261,7 +261,7 @@ class CompilationEngine(object):
             count = 0
             name = tok
             kind,index = self.table.getKind(name),self.table.getIndex(name)
-            tokType,tok = self.lookAhead()
+            tok = self.lookAhead()
             if tok == '(':
                 self.writer.writePush('pointer',0) # if is of form do something() it is method call within this class
                 self.validate('(')
@@ -293,14 +293,13 @@ class CompilationEngine(object):
             else:
                 self.writer.writePush(kind,index)
         else:
-            raise Exception('Illegal Token: %s %s' %(tokType,tok))
+            raise Exception('Illegal Token: %s' %(tok))
 
 
     def lookAhead(self):
         """looks ahead to next (token_type, token)"""
         tok = self.tokenizer.tokens[0]
-        tokType = self.tokenizer.tokenType(tok)
-        return tokType,tok
+        return tok
 
     def validate(self,string):
         """Accepts as string or list of strings. Advances to next token. If token type or token itself does not
