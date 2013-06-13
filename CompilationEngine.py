@@ -3,7 +3,7 @@ ops = {'=':'eq','+':'add','-':'sub','&':'and','|':'or','~':'not','<':'lt','>':'g
 
 class CompilationEngine(object):
     """Accepts instances of a JackTokenizer, SymbolTable and VMWriter as input. Parses
-    the tokens from the JackTokenizer using the SymbolTable to keep track of variables.
+    the Jack tokens from the JackTokenizer using the SymbolTable to keep track of variables.
     Through the VMWriter emits VM code to an output file"""
     def __init__(self,tokenizer,table,writer):
         """Creates a new compilation engine with the given input and output, 
@@ -44,7 +44,7 @@ class CompilationEngine(object):
         atLeastOne = False
         kind = 'argument'
         if routine == 'method':
-            self.table.define('this',None,kind)
+            self.table.define('this',None,kind)   # first argument of a method is a pointer
         while self.lookAhead() <> ')':
             if atLeastOne: 
                 self.validate(',')
@@ -70,10 +70,10 @@ class CompilationEngine(object):
             self.compileVarDec()
         self.writer.writeFunction(className+'.'+name,self.table.varCount('local')) # function nameoffunction #oflocals
         if kind == 'constructor':              # if 
-            count = self.table.varCount('this','outer')
+            count = self.table.varCount('field','outer') # was 'this,'outer'
             self.writer.writePush('constant',count)
             self.writer.writeCall('Memory.alloc',1) ##allocate memory for object
-            self.writer.writePop('pointer',0) ### assign pointer to object to pointer 0
+            self.writer.writePop('pointer',0) ### assign pointer to object instance to pointer 0
         if kind == 'method':
             self.writer.writePush('argument',0) # if it's a method the first argument is
             self.writer.writePop('pointer',0)   # a pointer to 'this'
@@ -82,6 +82,7 @@ class CompilationEngine(object):
         self.table.endSubroutine()       
 
     def compileVarDec(self):
+        """Compiles a var declaration"""
         self.validate('var')                          
         type = self.validate(['KEYWORD','IDENTIFIER'])
         name = self.validate('IDENTIFIER')
@@ -114,7 +115,7 @@ class CompilationEngine(object):
         """Compiles a do statement"""
         self.validate('do')
         self.compileTerm() 
-        self.writer.writePop('temp',0)
+        self.writer.writePop('temp',0)   # void functions return zero to global stack, need to pop it off
         self.validate(';')
 
     def compileLet(self):
@@ -122,14 +123,14 @@ class CompilationEngine(object):
         self.validate('let')
         tokType,tok = self.getNextToken()
         kind,index = self.table.getKind(tok),self.table.getIndex(tok)
-        if self.lookAhead() == '[':      
+        if self.lookAhead() == '[':      # if true then this is an assignment to some index of an array
             self.validate('[')
             self.compileExpression()
             self.validate(']')
             self.writer.writePush(kind,index)
-            self.writer.writeArithmetic('add')
+            self.writer.writeArithmetic('add') # add together index and base of array
             self.validate('=')
-            self.compileExpression() # now top of stack is y and just under it is x ....and if it's not a a[0]
+            self.compileExpression() 
             self.writer.writePop('temp',0)
             self.writer.writePop('pointer',1)
             self.writer.writePush('temp',0)
@@ -146,23 +147,23 @@ class CompilationEngine(object):
         label1 = 'WHILE_EXP%d' %self.whileNum
         label2 = 'WHILE_END%d' %self.whileNum
         self.whileNum += 1
-        self.writer.writeLabel(label1)              #label1
+        self.writer.writeLabel(label1)              #WHILE_EXP
         self.validate('(')
         self.compileExpression()
         self.validate(')')
         self.writer.writeArithmetic('not')          #compute ~(condition)
-        self.writer.writeIf(label2)                 #if-goto label2
+        self.writer.writeIf(label2)                 #if-goto WHILE_END
         self.validate('{')
         self.compileStatements()
         self.validate('}')            
-        self.writer.writeGoto(label1)               #goto label1
-        self.writer.writeLabel(label2)              #label2
+        self.writer.writeGoto(label1)               #goto WHILE_EXP
+        self.writer.writeLabel(label2)              #WHILE_END
 
     def compileReturn(self):
         """Compiles a return statement"""   
         self.validate('return')
         if self.lookAhead() <> ';':
-            self.compileExpression()                #this should leave value on top of stack
+            self.compileExpression()                #this should push return value to top of stack
         else:
             self.writer.writePush('constant',0)     # if is void return 0
         self.validate(';')
@@ -176,24 +177,23 @@ class CompilationEngine(object):
         label3 = 'IF_END%d' %self.ifNum
         self.ifNum += 1
         self.validate('(')
-        self.compileExpression()
-        self.validate(')')
-        #self.writer.writeArithmetic('not')   #calculate ~(condition)
-        self.writer.writeIf(label1)          #if-goto IF_TRUE
+        self.compileExpression()            #calculate (condition)
+        self.validate(')')   
+        self.writer.writeIf(label1)         #if-goto IF_TRUE
         self.writer.writeGoto(label2)       # GOTO IF_FALSE
         self.writer.writeLabel(label1)      #IF_TRUE
         self.validate('{')
         self.compileStatements()
         self.validate('}')
         if self.lookAhead() == 'else':
-            self.writer.writeGoto(label3)       #GOTO IF_END
+            self.writer.writeGoto(label3)   #GOTO IF_END
         self.writer.writeLabel(label2)      #IF_FALSE
         if self.lookAhead() == 'else':
             self.validate('else')
             self.validate('{')
             self.compileStatements()
             self.validate('}')       
-            self.writer.writeLabel(label3)      #IF_END
+            self.writer.writeLabel(label3)  #IF_END
 
     def compileExpression(self):
         """Compiles an expression"""
@@ -229,10 +229,10 @@ class CompilationEngine(object):
         if tokType == 'INT_CONST':
             self.writer.writePush('constant',tok)       
         elif tokType == 'STRING_CONST':
-            self.writer.writePush('constant',len(tok))
+            self.writer.writePush('constant',len(tok))          # argument for String.new
             self.writer.writeCall('String.new',1)               # create empty string of length len(tok)
             for letter in tok:
-                self.writer.writePush('constant',ord(letter))
+                self.writer.writePush('constant',ord(letter))   # argument for String.appendChar
                 self.writer.writeCall('String.appendChar', 2)   # append each letter to string            
         elif tokType == 'KEYWORD':
             if tok in ['false','null']:
@@ -241,7 +241,7 @@ class CompilationEngine(object):
                 self.writer.writePush('constant',0)
                 self.writer.writeArithmetic('not')
             elif tok == 'this':
-                self.writer.writePush('pointer',0)
+                self.writer.writePush('pointer',0)             # so 'return this' actually returns the pointer
             else:
                 raise Exception('%s is not an acceptable term' %tok)
         elif tokType == 'SYMBOL':
@@ -263,17 +263,16 @@ class CompilationEngine(object):
             kind,index = self.table.getKind(name),self.table.getIndex(name)
             tok = self.lookAhead()
             if tok == '(':
-                self.writer.writePush('pointer',0) # if is of form do something() it is method call within this class
+                self.writer.writePush('pointer',0) # if is of form 'do something()' it is method call within the current class
                 self.validate('(')
-                count = self.compileExpressionList() + 1
+                count = self.compileExpressionList() + 1  # the + 1 is due to first arg of method always being the pointer to field variables
                 self.validate(')')
                 currentClass = self.table.getClass()
                 self.writer.writeCall(currentClass+'.'+name,count)
             elif tok == '.':    
                 self.validate('.')
                 function = self.validate('IDENTIFIER')
-                print name, kind
-                if kind in ('this','local','static'):
+                if kind in ('field','local','static'): # was 'this,'local,static
                     self.writer.writePush(kind,index)
                     count = 1
                 self.validate('(')
@@ -303,16 +302,16 @@ class CompilationEngine(object):
 
     def validate(self,string):
         """Accepts as string or list of strings. Advances to next token. If token type or token itself does not
-        match string argument (or each item in list 'string') raises an exception. Returns token type and token itself"""
-        
+        match string argument (or at least one item in list ) raises an exception. Returns token token itself"""        
         tokType,tok = self.getNextToken()
         if type(string) <> list:
             string = [string]
         if not any([(tokType == s or tok == s) for s in string]):
-            raise Exception('Illegal token: %s %s , Expected: %s' %(tokType,tok,string[0]))
+            raise Exception('Illegal token: %s , Expected one of : %s' %(tok,string))
 	return tok 
 
     def getNextToken(self):
+        """Advances to next token, returns the tuple (token type , token )"""
         if self.tokenizer.hasMoreTokens():
             self.tokenizer.advance()
             tokType = self.tokenizer.tokenType()
@@ -332,5 +331,6 @@ class CompilationEngine(object):
             return (None,None)   
  
     def resetLabels(self):
+        """Sets label suffixes back to zero"""
         self.ifNum,self.whileNum = 0,0
 

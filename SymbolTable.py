@@ -22,7 +22,7 @@ class SymbolTable(object):
         """Defines a new Identifier of a given name, type and kind and assigns it to
         a running index. STATIC and FIELD identifiers have a class scope, while ARG and VAR
         have a subroutine scope"""
-        if kind == 'field': kind = 'this'
+        #if kind == 'field': kind = 'this'
         self.scope[name] = (type,kind,self.varCount(kind))
 
     def varCount(self, kind,scope='inner'):
@@ -80,6 +80,7 @@ class SymbolTable(object):
             return None
 
     def getKind(self,name):
+        """Searches both inner- and outerscope for a name to retrieve its kind"""
         innerScope = self.kindOf(name)
         if innerScope or self.outerscope == None:
             return innerScope
@@ -90,6 +91,7 @@ class SymbolTable(object):
                 return None        
     
     def getType(self,name):
+        """Searches both inner- and outerscope for a name to retrieve its type"""
         innerScope = self.typeOf(name)
         if innerScope or self.outerscope == None:
             return innerScope
@@ -100,6 +102,7 @@ class SymbolTable(object):
                 return None   
 
     def getIndex(self,name):
+        """Searches both inner- and outerscope for a name to retrieve its index"""
         innerScope = self.indexOf(name)
         if innerScope <> None or self.outerscope == None:
             return innerScope
@@ -109,6 +112,7 @@ class SymbolTable(object):
             except KeyError:
                 return None   
     def getClass(self):
+        """Returns name of current class"""
         for key,values in self.outerscope.items():
             if 'class' in values:
                 return key
