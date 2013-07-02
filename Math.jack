@@ -1,0 +1,152 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A basic math library.
+ */
+class Math {
+    static Array twoToThe;
+
+    /** Initializes the library. */
+    function void init(){               
+        var int j,val;
+        let twoToThe = Array.new(16);
+        let j = 0;
+        let val = 1;
+        while(j < 16){
+            let twoToThe[j] = val;
+            let j = j + 1;
+            let val = val + val;                
+        }
+        return;                   
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {               
+        if (x < 0) { 
+            return -x; 
+        }
+        else { 
+            return x;
+        }
+    }
+
+    function int multiply(int x, int y){
+        var int result;
+        let result = Math.multiplyAbs(x,y);
+
+        if (x < 0){
+            if (y > 0){
+                return -result;
+            }
+        }
+        if (y < 0){
+            if (x > 0){
+                return -result;
+            }
+        }
+        return result;
+    }
+
+    /** Returns the product of x and y. */
+    function int multiplyAbs(int x, int y) {       
+        var int shiftedX, sum, j;
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+        let sum = 0;
+        let shiftedX = x;
+        let j = 0;
+        while (j < 16){
+            if (Math.bit(y,j) = 1){
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;
+            let j = j + 1;
+        }
+        return sum;
+    }
+
+    /** Returns the integer part of x/y. */
+    function int divide(int x, int y) {         
+        var int absResult;
+        let absResult = Math.absDivide(Math.abs(x),Math.abs(y));
+        if (x < 0){
+            if (y > 0){
+                return -absResult;
+            }
+        }
+        if (y < 0){
+            if (x > 0){
+                return -absResult;
+            }
+        }
+        return absResult;
+    }
+
+    function int absDivide(int x, int y){         
+        var int q;
+        if (x < y){ 
+            return 0;
+        }
+        let q = Math.absDivide(x,y+y);
+        if ( (x- ((q+q)*y)) < y ){
+            return q + q;
+        }
+        else {
+            return q + q + 1;
+        }
+    }
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {                                 
+        var int result, j,sum,res;        
+        let result = 0;
+        let j = 7;
+        while (~(j < 0)){
+            let sum = result+twoToThe[j];
+            let res = Math.exp(sum,2);
+            if ( ~(res > x) ){
+                if (res > 0){
+                    let result = sum;
+                }
+            }
+            let j = j - 1;
+        }
+        return result;        
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {    
+        if (a > b){return a;}
+        else{return b;}   
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {        
+        if (a < b){return a;}
+        else{return b;}   
+    }
+
+    /** Returns x**j. */
+    function int exp(int x, int j){         
+        var int result;
+        let result = 1;
+        if (j = 0){ return 1;}
+        while (j > 0){
+            let result = result * x;
+            let j = j - 1;
+        }
+        return result;
+    }
+
+    /** Returns bit x[j]. */
+    function int bit(int x, int j){         
+        var int andResult;
+        let andResult = x & twoToThe[j];
+        if (andResult > 0){ return 1;}
+        else { return 0;}
+           
+    }
+}
