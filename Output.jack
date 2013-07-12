@@ -215,7 +215,7 @@ class Output {
         return;
     }
     function void printCharStay(char c) {
-        var int row, col, i, j,newPos;
+        var int  i, j;
         var Array map;
     
         let map = Output.getMap(c);
