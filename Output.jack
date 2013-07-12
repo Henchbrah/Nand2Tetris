@@ -18,7 +18,8 @@ class Output {
 
     /** Initializes the screen and locates the cursor at the screen's top-left. */
     function void init() {
-        var int j,val,location;
+        var int j,val;
+        do Output.initMap(); 
         let twoToThe = Array.new(16);
         let j = 0;
         let val = 1;
@@ -31,16 +32,8 @@ class Output {
         let cursorRow = 0;
         let cursorColumn = 0;
         do Output.printCharStay(32);
+       
 
-        do Output.initMap();        
-        while (cursorRow < 23){
-            while (cursorColumn < 63){
-                do Output.moveCursor(cursorRow,cursorColumn + 1);
-            }
-
-        }
-        let cursorRow = 0;
-        let cursorColumn = 0;
         return;
     }
 
@@ -243,11 +236,11 @@ class Output {
     function void printString(String s) {
         var int sLength, i;
 
-        let sLength = String.length();
+        
         let i = 0;
         
-        while (i < sLength){
-            do Output.printChar(s[i]);
+        while (i < s.length()){
+            do Output.printChar(s.charAt(i));
             let i = i + 1;
         }
         return;
@@ -258,8 +251,8 @@ class Output {
     function void printInt(int i) {
         var String string;
         let string = String.new(8);
-        
-        do Output.printString(string.setInt(i));
+        do string.setInt(i);
+        do Output.printString(string);
         do string.dispose();
         return;
     }
