@@ -1,0 +1,157 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * Graphic screen library.
+ */
+class Screen {
+    static int screenStart;
+    static boolean color;
+    static Array twoToThe;
+
+    /** Initializes the Screen. */
+    function void init() {              
+        var int j,val;
+        let screenStart = 16384;
+        let twoToThe = Array.new(16);
+        let j = 0;
+        let val = 1;
+        while(j < 16){
+            let twoToThe[j] = val;
+            let j = j + 1;
+            let val = val + val;                
+        }
+        let color = true;
+        //do Screen.clearScreen();
+        return;
+    }
+
+    
+
+    /** Erases the whole screen. */
+    function void clearScreen() {
+        var int i, j;
+        var boolean oldColor;
+        let oldColor = color;
+        let color = false;
+        let i = 0;
+        while (i < 512){
+            let j = 0;
+            while (j<256){
+                do Screen.drawPixel(i,j);
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        let color = oldColor;
+        return;
+    }
+
+    /** Sets the color to be used in further draw commands
+     *  where white = false, black = true. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x, y) pixel. */
+    function void drawPixel(int x, int y) {
+        var int word, bit, location, oldVal, newVal;
+        let word = (y*32) + (x/16);
+        let bit =  x-((x/16)*16); // x%16
+        let location = screenStart+word;
+        let oldVal = Memory.peek(location);
+        if (color){
+            let newVal = oldVal | twoToThe[bit];
+        }
+        else{
+            let newVal = oldVal & (~twoToThe[bit]);
+        }   
+        do Memory.poke(location, newVal);
+        return;   
+    }
+
+    /** Draws a line from (x1, y1) to (x2, y2). */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int xDiff, yDiff, xIncr, yIncr, dx, dy, adyminusbdx, a, b;
+        let xDiff = x2-x1;
+        let yDiff = y2-y1;
+        let dx = Math.abs(xDiff);
+        let dy = Math.abs(yDiff);
+        if (xDiff < 0){let xIncr = -1;}
+        else{let xIncr = 1;}
+        if (yDiff < 0){let yIncr = -1;}
+        else{let yIncr = 1;}
+        if (xDiff = 0){
+            do Screen.drawVerticalLine(x1,y1,y2,yIncr);
+            return;
+        }
+        if (yDiff = 0){
+            do Screen.drawHorizontalLine(x1,y1,x2,xIncr);
+            return;
+        }
+        let adyminusbdx = 0;
+        let a = 0;
+        let b = 0;
+        while ( (Math.abs(a) < dx) & (Math.abs(b) < dy) ){
+            do Screen.drawPixel(x1+a,y1+b);
+            if (adyminusbdx < 0){
+                let a = a + xIncr;
+                let adyminusbdx = adyminusbdx + dy;
+            }
+            else{
+                let b = b + yIncr;
+                let adyminusbdx = adyminusbdx - dx;
+            }
+        }
+        return; 
+    }
+
+    function void drawVerticalLine(int x, int y, int y2, int incr){
+        var int b;
+        let b = 0;
+        while (~((y+b) > y2)){
+            do Screen.drawPixel(x,y+b);
+            let b = b + incr;
+        }
+        return;       
+    }
+
+    function void drawHorizontalLine(int x, int y, int x2, int incr){
+        var int a;
+        let a = 0;
+        while (~((x+a) > x2)){
+            do Screen.drawPixel(x+a,y);
+            let a = a + incr;            
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle where the top left corner
+     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int a;
+        let a = 0;
+        while (~(a > (y2-y1) ) ){
+        do Screen.drawLine(x1,y1+a,x2,y1+a);
+        let a = a + 1;
+        }
+        return;
+    }
+
+    /** Draws a filled circle of radius r around (cx, cy). */
+    function void drawCircle(int cx, int cy, int r) {
+        var int ax, bx, dy;    
+     
+        let dy = - r;
+        while (~(dy>r)){
+            let ax = cx - Math.sqrt( (r*r)-(dy*dy) );
+            let bx = cx + Math.sqrt( (r*r)-(dy*dy) );
+            do Screen.drawLine(ax,cy+dy,bx,cy+dy);
+            let dy = dy + 1;
+        }
+        return;
+    }
+}
