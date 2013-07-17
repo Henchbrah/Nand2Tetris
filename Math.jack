@@ -84,9 +84,7 @@ class Math {
         if ( (x- ((q+q)*y)) < y ){
             return q + q;
         }
-        else {
-            return q + q + 1;
-        }
+        return q + q + 1;
     }
 
     /** Returns the integer part of the square root of x. */
@@ -109,14 +107,18 @@ class Math {
 
     /** Returns the greater number. */
     function int max(int a, int b) {    
-        if (a > b){return a;}
-        else{return b;}   
+        if (a > b){
+            return a;
+        }
+        return b;   
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {        
-        if (a < b){return a;}
-        else{return b;}   
+        if (a < b){
+            return a;
+        }
+        return b;  
     }
 
     /** Returns x**j. */
@@ -135,8 +137,9 @@ class Math {
     function int bit(int x, int j){         
         var int andResult;
         let andResult = x & twoToThe[j];
-        if (andResult > 0){ return 1;}
-        else { return 0;}
-           
+        if (andResult > 0){
+            return 1;
+        }        
+        return 0;           
     }
 }
