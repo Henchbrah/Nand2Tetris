@@ -63,7 +63,7 @@ class Memory {
             }
             let address = next; 
         }           
-        return pntr;       
+        return pntr;   // function will never actually get here but compiler likes it this way    
     }
 
     /** De-allocates the given object and frees its space. */
@@ -79,7 +79,7 @@ class Memory {
         do Memory.poke(address+1,object);
         do Memory.poke(object,Memory.peek(object)-2);
         do Memory.poke(object+1,0);
-    return; 
+        return; 
     }
    
 }
