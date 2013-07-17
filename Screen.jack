@@ -24,7 +24,6 @@ class Screen {
             let val = val + val;                
         }
         let color = true;
-        //do Screen.clearScreen();
         return;
     }
 
@@ -37,12 +36,8 @@ class Screen {
         let oldColor = color;
         let color = false;
         let i = 0;
-        while (i < 512){
-            let j = 0;
-            while (j<256){
-                do Screen.drawPixel(i,j);
-                let j = j + 1;
-            }
+        while (i < 8193){
+            do Memory.poke(screenStart+i,0);
             let i = i + 1;
         }
         let color = oldColor;
@@ -63,7 +58,7 @@ class Screen {
         let bit =  x-((x/16)*16); // x%16
         let location = screenStart+word;
         let oldVal = Memory.peek(location);
-        if (color){
+        if (color = true){
             let newVal = oldVal | twoToThe[bit];
         }
         else{
