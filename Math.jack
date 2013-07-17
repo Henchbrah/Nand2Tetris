@@ -28,9 +28,7 @@ class Math {
         if (x < 0) { 
             return -x; 
         }
-        else { 
-            return x;
-        }
+        return x;
     }
 
     function int multiply(int x, int y){
