@@ -1,0 +1,85 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * Memory operations library.
+ */ 
+class Memory {
+    static int freeList;
+    static Array memory;
+
+    /** Initializes memory parameters. */
+    function void init() {
+        let freeList = 14335;
+        let memory = 0;
+        let memory[freeList] = 16383 - 14335 - 2; //length of memory segment
+        let memory[freeList+1] = 0; // null pointer
+        return;
+    }
+
+    /** Returns the value of the main memory at the given address. */
+    function int peek(int address) {
+        return memory[address];
+    }
+
+    /** Sets the value of the main memory at this address
+     *  to the given value. */
+    function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
+    }
+
+    /** finds and allocates from the heap a memory block of the 
+     *  specified size and returns a reference to its base address. */
+    function int alloc(int size) {
+        var int address, length, next, bestLength, bestAddress, pntr;
+
+        if (size < 0){
+            do Sys.error(5);
+        }
+        
+        let address = freeList;
+        let bestAddress = 0;
+        let bestLength = 0;
+
+        while(true){
+            let length = Memory.peek(address);
+            let next = Memory.peek(address + 1);
+            if ( (length > size) & ( ((length-size) < bestLength-size) | (bestAddress = 0) )){
+                let bestLength = length;
+                let bestAddress = address;
+            }
+            if (next = 0){
+                if (bestAddress = 0){
+                    do Sys.error(6);
+                }
+                let length = bestLength-size;
+                do Memory.poke(bestAddress, length);
+                let pntr = bestAddress + length + 1;
+                do Memory.poke(pntr, size+1);
+                return pntr;
+            }
+            let address = next; 
+        }           
+        return pntr;       
+    }
+
+    /** De-allocates the given object and frees its space. */
+    function void deAlloc(int object) {
+        var int address,next;
+
+        let address = freeList;
+        let next = Memory.peek(address+1);
+        while (~(next=0)){
+            let address = next;
+            let next = Memory.peek(address+1);
+        }
+        do Memory.poke(address+1,object);
+        do Memory.poke(object,Memory.peek(object)-2);
+        do Memory.poke(object+1,0);
+    return; 
+    }
+   
+}
