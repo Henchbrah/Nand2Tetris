@@ -188,15 +188,7 @@ class Output {
 
     /** Moves the cursor to the j\92th column of the i\92th row,
      *  and erases the character that was there. */
-    function void moveCursor(int i, int j) {  
-        if ((i < 0)|(i > 22)){
-            do Sys.error(20);
-        }
-        if ((j < 0)|(j > 63)){
-            do Sys.error(20);
-        }
-        
-      
+    function void moveCursor(int i, int j) {        
         let cursorRow = i;
         let cursorColumn = j;
         do Output.printCharStay(32);  

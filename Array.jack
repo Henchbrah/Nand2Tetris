@@ -12,6 +12,9 @@ class Array {
     /** Constructs a new Array of the given size. */
     function Array new(int size) {
         var Array array;
+        if (size < 0){
+            do Sys.error(2);
+        }
         let array = Memory.alloc(size);
         return array;
         

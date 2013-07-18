@@ -54,11 +54,19 @@ class Screen {
     /** Draws the (x, y) pixel. */
     function void drawPixel(int x, int y) {
         var int word, bit, location, oldVal, newVal;
+
+        if ( (x > 511)|(x < 0 ) ){
+            do Sys.error(7);
+        }
+        if ((y > 255)|(y < 0)){
+            do Sys.error(7);
+        } 
+        
         let word = (y*32) + (x/16);
         let bit =  x-((x/16)*16); // x%16
         let location = screenStart+word;
         let oldVal = Memory.peek(location);
-        if (color = true){
+        if (color){
             let newVal = oldVal | twoToThe[bit];
         }
         else{
@@ -71,6 +79,20 @@ class Screen {
     /** Draws a line from (x1, y1) to (x2, y2). */
     function void drawLine(int x1, int y1, int x2, int y2) {
         var int xDiff, yDiff, xIncr, yIncr, dx, dy, adyminusbdx, a, b;
+
+        if ( (x1 > 511)|(x1 < 0 ) ){
+            do Sys.error(7);
+        }
+        if ((y1 > 255)|(y1 < 0)){
+            do Sys.error(7);
+        } 
+        if ( (x2 > 511)|(x2 < 0 ) ){
+            do Sys.error(7);
+        }
+        if ((y2 > 255)|(y2 < 0)){
+            do Sys.error(7);
+        } 
+
         let xDiff = x2-x1;
         let yDiff = y2-y1;
         let dx = Math.abs(xDiff);
@@ -128,6 +150,11 @@ class Screen {
      *  is (x1, y1) and the bottom right corner is (x2, y2). */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int a;
+
+        if ( (x2 < x1) | (y2 < y1) ){
+            do Sys.error(9);
+        }
+
         let a = 0;
         while (~(a > (y2-y1) ) ){
         do Screen.drawLine(x1,y1+a,x2,y1+a);
@@ -139,6 +166,15 @@ class Screen {
     /** Draws a filled circle of radius r around (cx, cy). */
     function void drawCircle(int cx, int cy, int r) {
         var int ax, bx, dy;    
+        if (~(r > 0)){
+            do Sys.error(13);
+        }
+        if ( (cx > 511)|(cx < 0 ) ){
+            do Sys.error(12);
+        }
+        if ((cy > 255)|(cy < 0)){
+            do Sys.error(12);
+        } 
      
         let dy = - r;
         while (~(dy>r)){

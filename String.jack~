@@ -111,13 +111,13 @@ class String {
         var int lastDigit;
 
         if (maxLen < 1){
-            do Sys.error(19);
+            do Sys.error(19)
         }
 
         let len = 0;
         if (number < 0){
             if (maxLen < 2){
-                do Sys.error(19);
+                do Sys.error(19)
             }
             do appendChar(45);
             let number = -number;
@@ -131,7 +131,7 @@ class String {
             let lastDigit = number - ((number / 10) * 10 );
             do setInt2(number/10);
             if (maxLen = len){
-                do Sys.error(19);
+                do Sys.error(19)
             }
             do appendChar(48+lastDigit);
         }
@@ -142,7 +142,7 @@ class String {
         var int lastDigit;
 
         if (maxLen = len){
-            do Sys.error(19);
+            do Sys.error(19)
         }
 
         if (number < 10){

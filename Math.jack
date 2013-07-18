@@ -65,6 +65,9 @@ class Math {
     /** Returns the integer part of x/y. */
     function int divide(int x, int y) {         
         var int absResult;
+        if (y = 0){
+            do Sys.error(3);
+            }
         let absResult = Math.absDivide(Math.abs(x),Math.abs(y));
         if ( (x < 0) & (y > 0) ){
             return -absResult;
@@ -89,7 +92,11 @@ class Math {
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {                                 
-        var int result, j,sum,res;        
+        var int result, j,sum,res;  
+
+        if (x < 0){
+           do Sys.error(4); 
+        }      
         let result = 0;
         let j = 7;
         while (~(j < 0)){
