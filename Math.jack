@@ -149,4 +149,9 @@ class Math {
         }        
         return 0;           
     }
+    
+    /** Returns x % y. */
+    function int mod(int a, int b){
+        return a - (b * (a/b)); 
+    }
 }

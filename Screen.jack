@@ -63,7 +63,7 @@ class Screen {
         } 
         
         let word = (y*32) + (x/16);
-        let bit =  x-((x/16)*16); // x%16
+        let bit =  Math.mod(x,16); 
         let location = screenStart+word;
         let oldVal = Memory.peek(location);
         if (color){

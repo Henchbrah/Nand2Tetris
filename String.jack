@@ -128,7 +128,7 @@ class String {
             return;
         }
         else {
-            let lastDigit = number - ((number / 10) * 10 );
+            let lastDigit = Math.mod(number,10); 
             do setInt2(number/10);
             if (maxLen = len){
                 do Sys.error(19);
@@ -149,7 +149,7 @@ class String {
             do appendChar(48+number);
         }
         else {
-            let lastDigit = number - ((number / 10) * 10 );
+            let lastDigit = Math.mod(number,10); 
             do setInt2(number / 10);
             do appendChar(48+lastDigit);
         }
