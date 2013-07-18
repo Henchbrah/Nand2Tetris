@@ -106,7 +106,7 @@ class Screen {
             return;
         }
         if (yDiff = 0){
-            do Screen.drawHorizontalLine(x1,y1,x2,xIncr);
+            do Screen.drawHorizontalLine(x1,y1,x2);
             return;
         }
         let adyminusbdx = 0;
@@ -136,13 +136,36 @@ class Screen {
         return;       
     }
 
-    function void drawHorizontalLine(int x, int y, int x2, int incr){
-        var int a;
-        let a = 0;
-        while (~((x+a) > x2)){
-            do Screen.drawPixel(x+a,y);
-            let a = a + incr;            
+    function void drawHorizontalLine(int x, int y, int x2){
+        var int a, b, i, xDiff, bit, pixels, words, currentWord, colour;
+        let i = 0;
+        let a = Math.min(x,x2);
+        let b = Math.max(x,x2);
+        let bit = Math.mod(a,16);
+        let words = (b-a)/16;
+        if (color){ let colour = -1;}
+        else { let colour = 0;}
+
+        if (bit>0){
+            let pixels = Math.mod(16 - bit,(b-a)); // bitDifference % xDifference
+            while ( (pixels > 0)){
+                do Screen.drawPixel(a+i,y);
+                let i = i + 1;   
+                let pixels = pixels - 1;         
+            }        
         }
+        let currentWord = screenStart + ((y*32)+((a+i)/16));
+        while (15 < (b-(a+i))){ 
+                do Memory.poke(currentWord,colour);
+                //let words = words - 1;
+                let i = i + 16;
+                let currentWord = currentWord + 1;
+        }
+        while (~((a+i) > b)){
+            do Screen.drawPixel(a+i,y);
+            let i = i + 1;   
+            let pixels = pixels - 1;   
+        }       
         return;
     }
 
@@ -150,12 +173,13 @@ class Screen {
      *  is (x1, y1) and the bottom right corner is (x2, y2). */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int a;
-
+    
         if ( (x2 < x1) | (y2 < y1) ){
             do Sys.error(9);
         }
 
         let a = 0;
+
         while (~(a > (y2-y1) ) ){
         do Screen.drawLine(x1,y1+a,x2,y1+a);
         let a = a + 1;
