@@ -9,12 +9,13 @@
 class Screen {
     static int screenStart;
     static boolean color;
-    static Array twoToThe;
+    static Array twoToThe,maskA,maskB;
 
     /** Initializes the Screen. */
     function void init() {              
-        var int j,val;
+        var int j,val,prior;
         let screenStart = 16384;
+        let color = true;
         let twoToThe = Array.new(16);
         let j = 0;
         let val = 1;
@@ -23,7 +24,23 @@ class Screen {
             let j = j + 1;
             let val = val + val;                
         }
-        let color = true;
+
+        let maskA = Array.new(16);
+        let maskB = Array.new(16);
+        let prior = 0;
+        let j = 0;
+        while (j<16){
+            let maskB[j] = prior | twoToThe[j];
+            let prior = maskB[j];
+            let j = j + 1;
+        }
+        let prior = 0;
+        let j = 15;
+        while (~(j<0)){
+            let maskA[j] = prior | twoToThe[j];
+            let prior = maskA[j];
+            let j = j -1;
+        }
         return;
     }
 
@@ -136,35 +153,43 @@ class Screen {
         return;       
     }
 
+
     function void drawHorizontalLine(int x, int y, int x2){
-        var int a, b, i, xDiff, bit, pixels, words, currentWord, colour;
-        let i = 0;
+        var int a, b, i,currentWord, colour, aBits,bitA,bitB;
+
         let a = Math.min(x,x2);
         let b = Math.max(x,x2);
-        let bit = Math.mod(a,16);
-        let words = (b-a)/16;
+        let bitA = Math.mod(a,16);
+        let bitB = Math.mod(b,16);
+
+        let i = 0;
         if (color){ let colour = -1;}
         else { let colour = 0;}
-
-        if (bit>0){
-            let pixels = Math.mod(16 - bit,(b-a)); // bitDifference % xDifference
-            while ( (pixels > 0)){
-                do Screen.drawPixel(a+i,y);
-                let i = i + 1;   
-                let pixels = pixels - 1;         
-            }        
-        }
         let currentWord = screenStart + ((y*32)+((a+i)/16));
+
+        if ((b-a+1)<16){
+            while (~(i>(b-a+1))){
+                do Screen.drawPixel(a+i,y);
+                let i = i + 1;           
+            }
+            return;  
+        }
+
+
+        if (bitA > 0){
+            let aBits = 16-bitA; 
+            do Memory.poke(currentWord,Memory.peek(currentWord) | maskA[bitA]);
+            let currentWord = currentWord + 1;
+            let i = i + aBits;                             
+        }
+        
         while (15 < (b-(a+i))){ 
                 do Memory.poke(currentWord,colour);
-                //let words = words - 1;
                 let i = i + 16;
                 let currentWord = currentWord + 1;
         }
-        while (~((a+i) > b)){
-            do Screen.drawPixel(a+i,y);
-            let i = i + 1;   
-            let pixels = pixels - 1;   
+        if (~((a+i) > b)){
+            do Memory.poke(currentWord,Memory.peek(currentWord) | maskB[bitB]);
         }       
         return;
     }
