@@ -27,6 +27,7 @@ class Screen {
 
         let maskA = Array.new(16);
         let maskB = Array.new(16);
+
         let prior = 0;
         let j = 0;
         while (j<16){
@@ -123,7 +124,7 @@ class Screen {
             return;
         }
         if (yDiff = 0){
-            do Screen.drawHorizontalLine(x1,y1,x2);
+            do Screen.drawHorizontalLine(x1,y1,x2,1);
             return;
         }
         let adyminusbdx = 0;
@@ -154,59 +155,71 @@ class Screen {
     }
 
 
-    function void drawHorizontalLine(int x, int y, int x2){
-        var int a, b, i, currentWord, lastWord, colour, aBits, bitA, bitB, mask;
+    function void drawHorizontalLine(int x, int y, int x2, int iter){
+        var int a, b, i, firstWord, currentWord, lastWord, colour, bitA, bitB, mask1, mask2, yTimes32;
 
         let a = Math.min(x,x2);
         let b = Math.max(x,x2);
         let bitA = Math.mod(a,16);
         let bitB = Math.mod(b,16);
+
+        let yTimes32 = y*32;
+        let firstWord = screenStart + (yTimes32+(a/16));
+        let lastWord = screenStart + (yTimes32+(b/16));
+        if (firstWord = lastWord){
+            let mask1 = maskB[bitB] & maskA[bitA];
+            if (~(color)){ 
+                let mask1 = ~mask1;
+            }
+            let currentWord = firstWord;
+            while (iter > 0){
+                    if (color){
+                        do Memory.poke(currentWord,Memory.peek(currentWord) | mask1);
+                    }
+                    else{
+                        do Memory.poke(currentWord,Memory.peek(currentWord) & mask1);
+                    }  
+                let iter = iter - 1;
+                let currentWord = currentWord + 32;
+            }
+            return;
+        }
+        let mask1 = maskA[bitA];
+        let mask2 = maskB[bitB];
         if (color){ 
             let colour = -1;
         }
         else { 
             let colour = 0;
-            }
-        let currentWord = screenStart + ((y*32)+(a/16));
-        let lastWord = screenStart + ((y*32)+(b/16));
-        if (currentWord = lastWord){
-            let mask = maskB[bitB] & maskA[bitA];
+            let mask1 = ~mask1;
+            let mask2 = ~mask2;
+        }
+    
+        while (iter > 0){
+            let currentWord = firstWord;
             if (color){
-                do Memory.poke(currentWord,Memory.peek(currentWord) | mask);
+                do Memory.poke(currentWord,Memory.peek(currentWord) | mask1);
             }
             else{
-                let mask = ~mask;
-                do Memory.poke(currentWord,Memory.peek(currentWord) & mask);
+                do Memory.poke(currentWord,Memory.peek(currentWord) & mask1);    
             }
-            return;  
-        }
-
-
-        let mask = maskA[bitA]; 
-        if (color){
-            do Memory.poke(currentWord,Memory.peek(currentWord) | mask);
-        }
-        else{
-            let mask = ~mask;
-            do Memory.poke(currentWord,Memory.peek(currentWord) & mask);    
-        }
-        let currentWord = currentWord + 1;   
-        
-        while (currentWord < lastWord){ 
-                do Memory.poke(currentWord,colour);
-                let currentWord = currentWord + 1;
-        }
-
-            if (color){
-                let mask = maskB[bitB];
-                do Memory.poke(currentWord,Memory.peek(currentWord) | mask);
+            let currentWord = currentWord + 1;   
+            
+            while (currentWord < lastWord){ 
+                    do Memory.poke(currentWord,colour);
+                    let currentWord = currentWord + 1;
             }
-            else{
-                let mask = ~mask;
-                do Memory.poke(currentWord,Memory.peek(currentWord) & mask);
-            }
-      
 
+                if (color){
+                    do Memory.poke(currentWord,Memory.peek(currentWord) | mask2);
+                }
+                else{
+                    do Memory.poke(currentWord,Memory.peek(currentWord) & mask2);
+                }
+            let iter = iter - 1;
+            let firstWord = firstWord + 32;
+            let lastWord = lastWord + 32;
+        }
         return;
     }
 
@@ -221,10 +234,10 @@ class Screen {
 
         let a = 0;
 
-        while ((y1+a-1)<y2){
-            do Screen.drawHorizontalLine(x1,y1+a,x2);
-            let a = a + 1;
-        }
+       // while ((y1+a-1)<y2){
+            do Screen.drawHorizontalLine(x1,y1+a,x2,y2-y1);
+         //   let a = a + 1;
+        //}
         return;
     }
 
@@ -245,7 +258,7 @@ class Screen {
         while (dy < (r+1)){
             let ax = cx - Math.sqrt( (r*r)-(dy*dy) );
             let bx = cx + Math.sqrt( (r*r)-(dy*dy) );
-            do Screen.drawHorizontalLine(ax,cy+dy,bx);
+            do Screen.drawHorizontalLine(ax,cy+dy,bx,1);
             let dy = dy + 1;
         }
         return;
