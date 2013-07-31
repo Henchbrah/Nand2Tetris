@@ -9,12 +9,13 @@
 class Screen {
     static int screenStart;
     static boolean color;
-    static Array twoToThe,maskA,maskB;
+    static Array twoToThe,maskA,maskB, screen;
 
     /** Initializes the Screen. */
     function void init() {              
         var int j,val,prior;
         let screenStart = 16384;
+        let screen = 16384;
         let color = true;
         let twoToThe = Array.new(16);
         let j = 0;
@@ -55,7 +56,8 @@ class Screen {
         let color = false;
         let i = 0;
         while (i < 8193){
-            do Memory.poke(screenStart+i,0);
+            //do Memory.poke(screenStart+i,0);
+            let screen[i] = 0;
             let i = i + 1;
         }
         let color = oldColor;
@@ -83,14 +85,16 @@ class Screen {
         let word = (y*32) + (x/16);
         let bit =  Math.mod(x,16); 
         let location = screenStart+word;
-        let oldVal = Memory.peek(location);
+        //let oldVal = Memory.peek(location);
+        let oldVal = screen[word];
         if (color){
             let newVal = oldVal | twoToThe[bit];
         }
         else{
             let newVal = oldVal & (~twoToThe[bit]);
         }   
-        do Memory.poke(location, newVal);
+        //do Memory.poke(location, newVal);
+        let screen[word] = newVal;
         return;   
     }
 
@@ -164,8 +168,8 @@ class Screen {
         let bitB = Math.mod(b,16);
 
         let yTimes32 = y*32;
-        let firstWord = screenStart + (yTimes32+(a/16));
-        let lastWord = screenStart + (yTimes32+(b/16));
+        let firstWord = yTimes32+(a/16);
+        let lastWord = yTimes32+(b/16);
         if (firstWord = lastWord){
             let mask1 = maskB[bitB] & maskA[bitA];
             if (~(color)){ 
@@ -174,10 +178,10 @@ class Screen {
             let currentWord = firstWord;
             while (iter > 0){
                     if (color){
-                        do Memory.poke(currentWord,Memory.peek(currentWord) | mask1);
+                        let screen[currentWord] = screen[currentWord] | mask1;
                     }
                     else{
-                        do Memory.poke(currentWord,Memory.peek(currentWord) & mask1);
+                        let screen[currentWord] = screen[currentWord] & mask1;
                     }  
                 let iter = iter - 1;
                 let currentWord = currentWord + 32;
@@ -198,23 +202,23 @@ class Screen {
         while (iter > 0){
             let currentWord = firstWord;
             if (color){
-                do Memory.poke(currentWord,Memory.peek(currentWord) | mask1);
+                let screen[currentWord] = screen[currentWord] | mask1 ;          
             }
             else{
-                do Memory.poke(currentWord,Memory.peek(currentWord) & mask1);    
+                let screen[currentWord] = screen[currentWord] & mask1 ;          
             }
             let currentWord = currentWord + 1;   
             
             while (currentWord < lastWord){ 
-                    do Memory.poke(currentWord,colour);
+
+                    let screen[currentWord] = colour;
                     let currentWord = currentWord + 1;
             }
-
                 if (color){
-                    do Memory.poke(currentWord,Memory.peek(currentWord) | mask2);
+                    let screen[currentWord] = screen[currentWord] | mask2 ;          
                 }
                 else{
-                    do Memory.poke(currentWord,Memory.peek(currentWord) & mask2);
+                    let screen[currentWord] = screen[currentWord] & mask2 ;          
                 }
             let iter = iter - 1;
             let firstWord = firstWord + 32;
@@ -233,11 +237,7 @@ class Screen {
         }
 
         let a = 0;
-
-       // while ((y1+a-1)<y2){
             do Screen.drawHorizontalLine(x1,y1+a,x2,y2-y1);
-         //   let a = a + 1;
-        //}
         return;
     }
 
