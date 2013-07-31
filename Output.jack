@@ -218,7 +218,7 @@ class Output {
     function void printCharStay(char c) {
         var int  i, j;
         var Array map;
-    
+        // herein lies my problem...if I just turn bits on...printCharStay(32) will do nothing
         let map = Output.getMap(c);
         let i = 0;        
         while(i < 11){
@@ -230,6 +230,11 @@ class Output {
                 else {
                     if (~((map[i] & twoToThe[j]) = 0)){
                         do Screen.drawPixel((cursorColumn * 8) + j, (cursorRow * 11) + i);
+                    }
+                    else{
+                        do Screen.setColor(false);
+                        do Screen.drawPixel((cursorColumn * 8) + j, (cursorRow * 11) + i);
+                        do Screen.setColor(true);
                     }
                 }
                 let j = j + 1;

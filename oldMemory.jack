@@ -44,12 +44,12 @@ class Memory {
         
         let address = freeList;
         let bestAddress = 0;
-        let bestLength = 14335;
+        let bestLength = 0;
 
         while(true){
             let length = Memory.peek(address);
             let next = Memory.peek(address + 1);
-            if ( (length > size) & (bestLength > (length-size)) ){
+            if ( (length > size) & ( ((length-size) < bestLength-size) | (bestAddress = 0) )){
                 let bestLength = length;
                 let bestAddress = address;
             }
@@ -57,10 +57,12 @@ class Memory {
                 if (bestAddress = 0){
                     do Sys.error(6);
                 }
+                //let length = bestLength-size;
                 let length = bestLength - (size+1);
                 do Memory.poke(bestAddress, length);   //new length of memory block is old length - size of block we are taking
+                //let pntr = bestAddress + length + 1;
                 let pntr = bestAddress + 2 + length;
-                do Memory.poke(pntr, size+1);
+                do Memory.poke(pntr, size+1);// why +1???
                 return pntr;
             }
             let address = next; 
