@@ -7,14 +7,12 @@
  * Graphic screen library.
  */
 class Screen {
-    static int screenStart;
     static boolean color;
     static Array twoToThe,maskA,maskB, screen;
 
     /** Initializes the Screen. */
     function void init() {              
         var int j,val,prior;
-        let screenStart = 16384;
         let screen = 16384;
         let color = true;
         let twoToThe = Array.new(16);
@@ -56,7 +54,6 @@ class Screen {
         let color = false;
         let i = 0;
         while (i < 8193){
-            //do Memory.poke(screenStart+i,0);
             let screen[i] = 0;
             let i = i + 1;
         }
@@ -73,7 +70,7 @@ class Screen {
 
     /** Draws the (x, y) pixel. */
     function void drawPixel(int x, int y) {
-        var int word, bit, location, oldVal, newVal;
+        var int word, bit, oldVal, newVal;
 
         if ( (x > 511)|(x < 0 ) ){
             do Sys.error(7);
@@ -84,8 +81,6 @@ class Screen {
         
         let word = (y*32) + (x/16);
         let bit =  Math.mod(x,16); 
-        let location = screenStart+word;
-        //let oldVal = Memory.peek(location);
         let oldVal = screen[word];
         if (color){
             let newVal = oldVal | twoToThe[bit];
@@ -93,7 +88,6 @@ class Screen {
         else{
             let newVal = oldVal & (~twoToThe[bit]);
         }   
-        //do Memory.poke(location, newVal);
         let screen[word] = newVal;
         return;   
     }
