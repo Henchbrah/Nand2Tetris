@@ -12,10 +12,8 @@ class Memory {
 
     /** Initializes memory parameters. */
     function void init() {
-        //let freeList = 14335;
         let freeList = 2048;
         let memory = 0;
-        //let memory[freeList] = 16383 - 14335 - 2; //length of memory segment
         let memory[freeList] = 16383-2048-2; //length of memory segment
         let memory[freeList+1] = 0; // null pointer
         return;
