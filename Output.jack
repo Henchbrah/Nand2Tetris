@@ -160,7 +160,6 @@ class Output {
 
 	let map = Array.new(11);
         let charMaps[index] = map;
-
         let map[0] = a;
         let map[1] = b;
         let map[2] = c;
@@ -172,14 +171,15 @@ class Output {
         let map[8] = i;
         let map[9] = j;
         let map[10] = k;
-//   new code below
-        if ((index = 0)|(index=32)){  // special cases to be handles in printCharStay()
+
+        //below creates left shifted versions of the character maps
+
+        if ((index = 0)|(index=32)){  // special cases to be handles in printCharStay(
             return;
         }
         let index = index + 98;
         let shiftedMap = Array.new(11);
         let charMaps[index] = shiftedMap;
-
             let shiftedMap[0] = a*256; // a times 2^8 to shift 8 bits
             let shiftedMap[1] = b*256;
             let shiftedMap[2] = c*256;
@@ -199,10 +199,6 @@ class Output {
     // If an invalid character is given, returns the character map of a black square.
     function Array getMap(char c) {
         
-        //if ((c < 32) | (c > 126)) {
-          //  let c = 0;
-        //}
-        
         return charMaps[c];
     }
 
@@ -214,9 +210,7 @@ class Output {
         }
         if ((j < 0)|(j > 63)){
             do Sys.error(20);
-        }
-        
-      
+        }     
         let cursorRow = i;
         let cursorColumn = j;
         do Output.printCharStay(32);  
@@ -261,6 +255,14 @@ class Output {
                     let c = c + 98;
                 }
             }
+        }
+        if ( ((c>0)&(c<32)) | (c>224) ){
+            if (bit > 0){
+                let c = 32;
+            }
+            else{
+                let c = 0;
+            }       
         }       
         let map = Output.getMap(c);
         if (and){
@@ -301,7 +303,6 @@ class Output {
         do string.setInt(i);
         do Output.printString(string);
         do string.dispose();
-
         return;
     }
 
