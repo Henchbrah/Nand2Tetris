@@ -1,0 +1,2 @@
+This repository contains code for the four hardware development projects presented in The Elements of Computing Systems: Building a Modern Computer from First Principles by Noam Nisan and Shimon Schocken. The code is written in a simple HDL and constructs the Hack platform, a 16-bit von Neumann machine. For more information on The Elements of Computing Systems please visit http://www.nand2tetris.org/
+
