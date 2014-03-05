@@ -1,0 +1,261 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * Graphic screen library.
+ */
+class Screen {
+    static boolean color;
+    static Array twoToThe,maskA,maskB, screen;
+
+    /** Initializes the Screen. */
+    function void init() {              
+        var int j,val,prior;
+        let screen = 16384;
+        let color = true;
+        let twoToThe = Array.new(16);
+        let j = 0;
+        let val = 1;
+        while(j < 16){
+            let twoToThe[j] = val;
+            let j = j + 1;
+            let val = val + val;                
+        }
+
+        let maskA = Array.new(16);
+        let maskB = Array.new(16);
+
+        let prior = 0;
+        let j = 0;
+        while (j<16){
+            let maskB[j] = prior | twoToThe[j];
+            let prior = maskB[j];
+            let j = j + 1;
+        }
+        let prior = 0;
+        let j = 15;
+        while (~(j<0)){
+            let maskA[j] = prior | twoToThe[j];
+            let prior = maskA[j];
+            let j = j -1;
+        }
+        return;
+    }
+
+    
+
+    /** Erases the whole screen. */
+    function void clearScreen() {
+        var int i, j;
+        var boolean oldColor;
+        let oldColor = color;
+        let color = false;
+        let i = 0;
+        //while (i < 8193){   
+        while (i < 8192){ // 32 words per row, 256 rows = 8192 words screen[0] through screen[8191]
+            let screen[i] = 0;
+            let i = i + 1;
+        }
+        let color = oldColor;
+        return;
+    }
+
+    /** Sets the color to be used in further draw commands
+     *  where white = false, black = true. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x, y) pixel. */
+    function void drawPixel(int x, int y) {
+        var int word, bit, oldVal, newVal;
+
+        if ( (x > 511)|(x < 0 ) ){
+            do Sys.error(7);
+        }
+        if ((y > 255)|(y < 0)){
+            do Sys.error(7);
+        } 
+        
+        let word = (y*32) + (x/16);
+        let bit =  Math.mod(x,16); 
+        let oldVal = screen[word];
+        if (color){
+            let newVal = oldVal | twoToThe[bit];
+        }
+        else{
+            let newVal = oldVal & (~twoToThe[bit]);
+        }   
+        let screen[word] = newVal;
+        return;   
+    }
+
+    /** Draws a line from (x1, y1) to (x2, y2). */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int xDiff, yDiff, xIncr, yIncr, dx, dy, adyminusbdx, a, b;
+
+        if ( (x1 > 511)|(x1 < 0 ) ){
+            do Sys.error(7);
+        }
+        if ((y1 > 255)|(y1 < 0)){
+            do Sys.error(7);
+        } 
+        if ( (x2 > 511)|(x2 < 0 ) ){
+            do Sys.error(7);
+        }
+        if ((y2 > 255)|(y2 < 0)){
+            do Sys.error(7);
+        } 
+
+        let xDiff = x2-x1;
+        let yDiff = y2-y1;
+        let dx = Math.abs(xDiff);
+        let dy = Math.abs(yDiff);
+        if (xDiff < 0){let xIncr = -1;}
+        else{let xIncr = 1;}
+        if (yDiff < 0){let yIncr = -1;}
+        else{let yIncr = 1;}
+        if (xDiff = 0){
+            do Screen.drawVerticalLine(x1,y1,y2,yIncr);
+            return;
+        }
+        if (yDiff = 0){
+            do Screen.drawHorizontalLine(x1,y1,x2,1);
+            return;
+        }
+        let adyminusbdx = 0;
+        let a = 0;
+        let b = 0;
+        while ( (Math.abs(a) < dx) & (Math.abs(b) < dy) ){
+            do Screen.drawPixel(x1+a,y1+b);
+            if (adyminusbdx < 0){
+                let a = a + xIncr;
+                let adyminusbdx = adyminusbdx + dy;
+            }
+            else{
+                let b = b + yIncr;
+                let adyminusbdx = adyminusbdx - dx;
+            }
+        }
+        return; 
+    }
+
+    function void drawVerticalLine(int x, int y, int y2, int incr){
+        var int b;
+        let b = 0;
+        while (~((y+b) > y2)){
+            do Screen.drawPixel(x,y+b);
+            let b = b + incr;
+        }
+        return;       
+    }
+
+
+    function void drawHorizontalLine(int x, int y, int x2, int iter){
+        var int a, b, i, firstWord, currentWord, lastWord, colour, bitA, bitB, mask1, mask2, yTimes32;
+
+        let a = Math.min(x,x2);
+        let b = Math.max(x,x2);
+        let bitA = Math.mod(a,16);
+        let bitB = Math.mod(b,16);
+
+        let yTimes32 = y*32;
+        let firstWord = yTimes32+(a/16);
+        let lastWord = yTimes32+(b/16);
+        if (firstWord = lastWord){
+            let mask1 = maskB[bitB] & maskA[bitA];
+            if (~(color)){ 
+                let mask1 = ~mask1;
+            }
+            let currentWord = firstWord;
+            while (iter > 0){
+                    if (color){
+                        let screen[currentWord] = screen[currentWord] | mask1;
+                    }
+                    else{
+                        let screen[currentWord] = screen[currentWord] & mask1;
+                    }  
+                let iter = iter - 1;
+                let currentWord = currentWord + 32;
+            }
+            return;
+        }
+        let mask1 = maskA[bitA];
+        let mask2 = maskB[bitB];
+        if (color){ 
+            let colour = -1;
+        }
+        else { 
+            let colour = 0;
+            let mask1 = ~mask1;
+            let mask2 = ~mask2;
+        }
+    
+        while (iter > 0){
+            let currentWord = firstWord;
+            if (color){
+                let screen[currentWord] = screen[currentWord] | mask1 ;          
+            }
+            else{
+                let screen[currentWord] = screen[currentWord] & mask1 ;          
+            }
+            let currentWord = currentWord + 1;   
+            
+            while (currentWord < lastWord){ 
+
+                    let screen[currentWord] = colour;
+                    let currentWord = currentWord + 1;
+            }
+                if (color){
+                    let screen[currentWord] = screen[currentWord] | mask2 ;          
+                }
+                else{
+                    let screen[currentWord] = screen[currentWord] & mask2 ;          
+                }
+            let iter = iter - 1;
+            let firstWord = firstWord + 32;
+            let lastWord = lastWord + 32;
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle where the top left corner
+     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int a;
+    
+        if ( (x2 < x1) | (y2 < y1) ){
+            do Sys.error(9);
+        }
+
+        let a = 0;
+            do Screen.drawHorizontalLine(x1,y1+a,x2,y2-y1);
+        return;
+    }
+
+    /** Draws a filled circle of radius r around (cx, cy). */
+    function void drawCircle(int cx, int cy, int r) {
+        var int ax, bx, dy;    
+        if (~(r > 0)){
+            do Sys.error(13);
+        }
+        if ( (cx > 511)|(cx < 0 ) ){
+            do Sys.error(12);
+        }
+        if ((cy > 255)|(cy < 0)){
+            do Sys.error(12);
+        } 
+     
+        let dy = - r;
+        while (dy < (r+1)){
+            let ax = cx - Math.sqrt( (r*r)-(dy*dy) );
+            let bx = cx + Math.sqrt( (r*r)-(dy*dy) );
+            do Screen.drawHorizontalLine(ax,cy+dy,bx,1);
+            let dy = dy + 1;
+        }
+        return;
+    }
+}
