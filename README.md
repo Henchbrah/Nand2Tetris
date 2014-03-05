@@ -1,4 +1,4 @@
-The brief description of these projects follows. However, for full specifications of Hack hardware/software please see www.nand2tetris.org
+A brief description of these projects follows. However, for full specifications of Hack hardware/software please see www.nand2tetris.org
 
 
 
