@@ -1,0 +1,61 @@
+class Main{
+    function Bool overlapping(int Tx,int Ty,int Hx,int Hy){
+        if (~(Hx > (Tx-5))){return false;}
+        if (~(Hx < (Tx+5))){return false;}
+        if (~(Hy > (Ty-5))){return false;}
+        if (~(Hy < (Ty+5))){return false;}
+        return true;
+    }
+
+	function void main(){
+        var Snake S;
+        var int dir,in,x,y,Tx,Ty,Hx,Hy;
+        var Game G;	  
+        var Egg E;
+        var Block tail, head;  
+        let G = Game.new();
+        do G.displayScore();
+        let E = G.getCurrentEgg();
+        let S = Snake.new();
+        while (1=1){
+            do E.draw();
+            let in = Keyboard.keyPressed();
+            let dir = G.input(in);
+            if (~(dir=0)){
+                do S.changeDirection(dir);
+            }
+            let x = S.getNextX();
+            let y = S.getNextY();
+            if (G.outOfBounds(x,y)){
+                do G.endGame();                
+            }             
+
+            let tail = S.getTail();
+            let head = S.getHead();
+            let Hx = head.getX();
+            let Hy = head.getY();
+            while (~(tail=head)){
+                let Tx = tail.getX();
+                let Ty = tail.getY();
+                if (Main.overlapping(Tx,Ty,Hx,Hy)){
+                    do G.endGame();
+                }
+            let tail = tail.getNextBlock();
+            }            
+
+            if (E.isEgg(x,y)){
+                do S.setGrow(1);                
+                do E.undraw();  
+                do G.changeCurrentEgg();
+                let E = G.getCurrentEgg();   
+                do G.incrBonus();
+            }
+            do S.move(x,y);
+            do G.incrScore(1);
+            do G.displayScore();
+            do Sys.wait(100);
+        }
+        do a.move();
+        return;
+	}	
+}

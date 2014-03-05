@@ -1,0 +1,124 @@
+class Game{
+    field int score, bonus, current;  
+    field Array eggs;  
+    
+    /* initializes score,bonus and current to zero, draws boarder, makes array of eggs and displays score*/
+    constructor Game new(){
+        do Screen.clearScreen();
+        let score = 0;
+        let current = 0;
+        let bonus = 0;
+        let eggs = Array.new(15); 
+        let eggs[0] = Egg.new(60,60); 
+        let eggs[1] = Egg.new(90,90); 
+        let eggs[2] = Egg.new(120,120);
+        let eggs[3] = Egg.new(150,150); 
+        let eggs[4] = Egg.new(210,210); 
+        let eggs[5] = Egg.new(30,210);
+        let eggs[6] = Egg.new(30,30);
+        let eggs[7] = Egg.new(60,180); 
+        let eggs[8] = Egg.new(30,90); 
+        let eggs[9] = Egg.new(90,150);
+        let eggs[10] = Egg.new(400,30);  
+        let eggs[11] = Egg.new(350,120);  
+        let eggs[12] = Egg.new(300,90);  
+        let eggs[13] = Egg.new(250,60);  
+        let eggs[14] = Egg.new(400,200);          
+ 
+        do Screen.drawRectangle(17,12,494,17); // top
+        do Screen.drawRectangle(12,12,17,243); // left
+        do Screen.drawRectangle(17,238,494,243); // bottom
+        do Screen.drawRectangle(494,12,499,243); // right
+        do Output.moveCursor(0,0);
+        do Output.printString("SCORE:");
+        return this;
+    }
+
+    /** retrieves current egg object*/
+    method Egg getCurrentEgg(){
+          return eggs[current];
+        }
+
+    /** changes current egg object to the next in the array of eggs*/
+    method void changeCurrentEgg(){
+        let current = current + 1;
+        if (current = 15){
+            let current = 0;
+        }   
+        return;
+
+    }
+    /** displays score on */
+    method void displayScore(){
+        do Output.moveCursor(0,7);
+        do Output.printInt(score);
+        return;
+    }
+    
+    /** increments score */
+    method void incrScore(){
+        let score = score + bonus;
+        return; 
+        }
+
+    /** increments bonus by 5 */
+    method void incrBonus(){
+        let bonus = bonus + 5;
+        return;
+    }
+
+    /** ends game, displays score*/
+    method void endGame(){
+        do Screen.clearScreen();
+        do Output.moveCursor(10,30);
+        do Output.printString("GAME OVER!");
+        do Output.moveCursor(12,30);
+        do Output.printString("SCORE: ");   
+        do Output.printInt(score);
+        while (1=1){
+                    
+        }
+        return;
+    }
+
+    /** returns true if x,y are illegal coordinates, false if they are not */
+    method Bool outOfBounds(int x, int y){
+        if (x < 17){
+            return true;
+        }
+        if (x > 489){
+            return true;
+        }
+        if (y < 17){
+            return true;
+        }
+        if (y > 233){
+            return true;
+        }
+        return false;
+        }
+
+    /** returns appropriate directions i=up=1,j=left=4,l=right=2,k=down=3 */
+    method int input(int dir){
+        if (dir=73){
+            return 1;
+        }  
+        if (dir=76){
+            return 2;
+        }
+        if (dir=75){
+            return 3;
+        }
+        if (dir=74){
+            return 4;
+        }          
+        return 0;
+    }
+
+    /** Accessors */          
+    method int getScore(){return score;}
+    method int getBonus(){return bonus;}
+    method int getCurrent(){return current;}
+
+
+}

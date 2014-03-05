@@ -1,0 +1,93 @@
+/** Provides Block type */
+class Block {
+    field int X1, Y1, X2, Y2;
+    field Block next; 
+    /** Constructs new block with coordinates for top left and bottom right corner
+     * as well as a pointer to the next block */
+    constructor Block new(int x, int y, Block cdr){        
+        let X1 = x;
+        let Y1 = y;
+        let X2 = x+5;
+        let Y2 = y+5;
+        let next = cdr;
+        return this;
+    }
+
+    /** Draws block on screen*/
+    method void draw(){
+        do Screen.drawRectangle(X1,Y1,X2,Y2);
+        return;    
+
+    }
+
+    /**Removes block from screen*/
+    method void undraw(){
+        do Screen.setColor(false);
+        do Screen.drawRectangle(X1,Y1,X2,Y2);
+        do Screen.setColor(true);
+        return;
+    }
+
+    /** Changes next block */
+    method void movePointer(Block other){
+        let next = other;
+        return;
+    }
+
+    /** Changes coordinates of block */
+    method void move(int a,int b,int c,int d){
+        let X1 = a;
+        let Y1 = b;
+        let X2 = c;
+        let Y2 = d;
+        return;
+    }
+    
+    /** Based on given direction, returns where X1 would be */
+    method int getNextX(int dir){
+        if (dir = 1){
+            return X1;
+        }    
+        if (dir = 2){
+            return X1+5;
+        }    
+        if (dir = 3){
+            return X1;
+        }    
+        if (dir = 4){
+            return X1-5;
+        } 
+        do Output.printString("invalid direction fed to getNextX method"); 
+        return 0;           
+    }
+
+    /** Based on given direction, returns where Y1 would be */
+    method int getNextY(int dir){
+        if (dir = 1){
+            return Y1-5;
+        }    
+        if (dir = 2){
+            return Y1;
+        }    
+        if (dir = 3){
+            return Y1+5;
+        }    
+        if (dir = 4){
+            return Y1;
+        } 
+        do Output.printString("invalid direction fed to getNexty method");     
+        return 0;      
+    }
+
+
+    /** Accessors */
+    method int getX1(){return X1;}
+    method int getY1(){return Y1;}
+    method int getX2(){return X2;}
+    method int getY2(){return Y2;}
+    method int getX(){return X1;}
+    method int getY(){return Y1;}
+    method Block getNextBlock(){return next;}
+
+}
+
